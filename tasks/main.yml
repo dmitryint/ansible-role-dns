@@ -4,6 +4,14 @@
   when: ansible_os_family == 'Debian' and dns_remove_resolvconf
   tags: [packages,dns]
 
+- name: check the current symlink
+  stat: path=/etc/resolv.conf 
+  register: resolv_conf
+
+- name: remove the symlink (only if it is a symlink)
+  file: path=/etc/resolv.conf state=absent
+  when: resolv_conf.stat.islnk is defined and resolv_conf.stat.islnk
+
 - name: Ensure dns servers are configured in /etc/resolv.conf
   template: src=resolv.conf.j2 dest=/etc/resolv.conf
   tags: [configuration,dns]
